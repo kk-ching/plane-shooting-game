@@ -99,7 +99,7 @@ class Enemy(Plane):
 
     def set_speed(self,new_speed):
         self.speed = new_speed
-        
+
     def update(self):
 
         playerposition = PLAYER.rect.center
@@ -183,7 +183,7 @@ class EnemyBullet(Bullet):
         self.radius = 5
         self.damage = 5
 
-        spawnoffset = 30 #TODO: flexible spawn offset 
+        spawnoffset = 50 #TODO: flexible spawn offset 
         posistionX = self.shooter.rect.centerx + spawnoffset * math.cos(math.radians(self.angle))
         posistionY = self.shooter.rect.centery - spawnoffset * math.sin(math.radians(self.angle))
         #print(f"Enenmy bullet spawned at {posistionX},{posistionY} angle: {self.angle} offset: {spawnoffset} plane rect size: {self.shooter.rect.w}, {self.shooter.rect.h}")
@@ -215,11 +215,11 @@ while True:
     ENEMIES.draw(DISPLAYSURF)
     BULLETS.draw(DISPLAYSURF)
 
-    playerHits = pygame.sprite.groupcollide(ENEMIES,BULLETS,False,True).items()
+    playerHits = pygame.sprite.groupcollide(ENEMIES,BULLETS,False,True,pygame.sprite.collide_circle).items()
     for enemy,bullets in playerHits:
         enemy.hp -= len(bullets)
     for enemy in ENEMIES:
-        pygame.draw.rect(DISPLAYSURF,RED,enemy.rect,2)
+        pygame.draw.circle(DISPLAYSURF,RED,enemy.rect.center,enemy.radius,2)
         imageRect = enemy.image.get_rect()
         imageRect.center = enemy.rect.center
         pygame.draw.rect(DISPLAYSURF,GRAY,imageRect,2)
