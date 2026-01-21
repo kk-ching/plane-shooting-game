@@ -155,10 +155,12 @@ class Bullet(pygame.sprite.Sprite):
     def __init__(self,plane,angle):
         super().__init__()
         self.shooter: Plane = plane
+        self.image =  pygame.transform.rotate(PLAYERBULLET_IMAGE,angle-90)
         self.speed = 50
         self.angle = angle
     
     def update(self):
+        self.image = pygame.transform.rotate(PLAYERBULLET_IMAGE,self.angle-90)
         dx = math.cos(math.radians(self.angle)) * self.speed
         dy = math.sin(math.radians(self.angle)) * self.speed
         self.rect.move_ip(dx, -dy)
@@ -169,7 +171,6 @@ class Bullet(pygame.sprite.Sprite):
 class PlayerBullet(Bullet):
     def __init__(self,plane,angle,offset = 0):
         super().__init__(plane,angle)
-        self.image = PLAYERBULLET_IMAGE
         self.rect = self.image.get_rect()
         self.radius = 5
         self.rect.center = (int((self.shooter.rect.left + self.shooter.rect.right) / 2) + offset, self.shooter.rect.top)
@@ -178,7 +179,6 @@ class PlayerBullet(Bullet):
 class EnemyBullet(Bullet):
     def __init__(self,plane,angle):
         super().__init__(plane,angle)
-        self.image = ENEMYBULLET_IMAGE
         self.rect = self.image.get_rect()
         self.radius = 5
         self.damage = 5
@@ -217,7 +217,7 @@ while True:
 
     playerHits = pygame.sprite.groupcollide(ENEMIES,BULLETS,False,True,pygame.sprite.collide_circle).items()
     for enemy,bullets in playerHits:
-        enemy.hp -= len(bullets)
+        enemy.hp -= len(bullets) * 20
     for enemy in ENEMIES:
         pygame.draw.circle(DISPLAYSURF,RED,enemy.rect.center,enemy.radius,2)
         imageRect = enemy.image.get_rect()
