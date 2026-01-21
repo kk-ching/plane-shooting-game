@@ -21,8 +21,7 @@ ENEMIES = pygame.sprite.Group()
 #IMAGES
 PLAYER_IMAGE = pygame.image.load("images/f16_50p.png")
 ENEMY_IMAGE = pygame.image.load("images/MIG29_50p.png")
-PLAYERBULLET_IMAGE = pygame.image.load("images/bullet_i.png")
-ENEMYBULLET_IMAGE = pygame.transform.flip(PLAYERBULLET_IMAGE,0,1)
+BULLET_IMAGE = pygame.image.load("images/bullet_i.png")
 
 
 FPS = pygame.time.Clock()
@@ -155,12 +154,12 @@ class Bullet(pygame.sprite.Sprite):
     def __init__(self,plane,angle):
         super().__init__()
         self.shooter: Plane = plane
-        self.image =  pygame.transform.rotate(PLAYERBULLET_IMAGE,angle-90)
+        self.image =  pygame.transform.rotate(BULLET_IMAGE,angle-90)
         self.speed = 50
         self.angle = angle
     
     def update(self):
-        self.image = pygame.transform.rotate(PLAYERBULLET_IMAGE,self.angle-90)
+        self.image = pygame.transform.rotate(BULLET_IMAGE,self.angle-90)
         dx = math.cos(math.radians(self.angle)) * self.speed
         dy = math.sin(math.radians(self.angle)) * self.speed
         self.rect.move_ip(dx, -dy)
@@ -186,14 +185,14 @@ class EnemyBullet(Bullet):
         spawnoffset = 50 #TODO: flexible spawn offset 
         posistionX = self.shooter.rect.centerx + spawnoffset * math.cos(math.radians(self.angle))
         posistionY = self.shooter.rect.centery - spawnoffset * math.sin(math.radians(self.angle))
-        #print(f"Enenmy bullet spawned at {posistionX},{posistionY} angle: {self.angle} offset: {spawnoffset} plane rect size: {self.shooter.rect.w}, {self.shooter.rect.h}")
         self.rect.center = (posistionX,posistionY)
+
+        #print(f"Enenmy bullet spawned at {posistionX},{posistionY} angle: {self.angle} offset: {spawnoffset} plane rect size: {self.shooter.rect.w}, {self.shooter.rect.h}")
 
 
 
 
     
-currentangle = 0
 
 PLAYER = Player()
 ENEMY = Enemy()
@@ -227,5 +226,3 @@ while True:
     pygame.display.update()
     FPS.tick(60)
 
-
-#created by s0ra131
