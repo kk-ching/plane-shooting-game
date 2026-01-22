@@ -1,5 +1,6 @@
 import sys
 import pygame
+import random
 import math
 from pygame.locals import *
 
@@ -84,11 +85,11 @@ class Player(Plane):
         surface.blit(self.image, self.rect)
 
 class Enemy(Plane):
-    def __init__(self,):
+    def __init__(self,spawnoffset = 0):
         super().__init__()
         self.image = ENEMY_IMAGE
         self.rect = self.image.get_rect()
-        self.rect.center = (500,160)
+        self.rect.center = (500+spawnoffset,160)
         self.radius = 25
         self.fire_CD = 30
         self.non_shoot_frame_count = 0
@@ -210,6 +211,11 @@ while True:
     PLAYER.update()
     ENEMIES.update()
 
+    #enemy spawning
+    if len(ENEMIES) <5:
+        randomoffset = random.randint(-480,480)
+        new_enemy = Enemy(randomoffset)
+        ENEMIES.add(new_enemy)
     DISPLAYSURF.fill(LIGHTBLUE)
     PLAYER.draw(DISPLAYSURF)
     ENEMIES.draw(DISPLAYSURF)
