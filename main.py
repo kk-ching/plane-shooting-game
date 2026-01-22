@@ -1,9 +1,16 @@
 import sys
 import pygame
+import random
 import math
 from pygame.locals import *
 
 pygame.init()
+
+#config
+WINDOWSIZE_WIDTH = 1000
+WINDOWSIZE_LENGTH = 1000
+
+
 
 BLACK = pygame.Color(0, 0, 0)         # Black
 WHITE = pygame.Color(255, 255, 255)   # White
@@ -11,7 +18,7 @@ GRAY = pygame.Color(128, 128, 128)   # Grey
 RED = pygame.Color(255, 0, 0)       # Red
 LIGHTBLUE = pygame.Color(0, 191, 255)
 
-DISPLAYSURF = pygame.display.set_mode((1000,1000))
+DISPLAYSURF = pygame.display.set_mode((WINDOWSIZE_WIDTH,WINDOWSIZE_LENGTH))
 DISPLAYSURF.fill(LIGHTBLUE)
 
 PLAYER = None
@@ -72,10 +79,10 @@ class Player(Plane):
                 BULLETS.add(bullet2)
                 self.non_shoot_frame_count = 0
         
-
-
-
         self.non_shoot_frame_count += 1
+
+        if self.hp < 0:
+            sys.exit()
         #position = self.rect.center
         #print(f"Player is at ({position[0],position[1]})) HITBOX:({self.rect.left},{self.rect.right}).")
 
@@ -83,15 +90,16 @@ class Player(Plane):
         surface.blit(self.image, self.rect)
 
 class Enemy(Plane):
-    def __init__(self,):
+    def __init__(self,spawnoffset = 0):
         super().__init__()
         self.image = ENEMY_IMAGE
         self.rect = self.image.get_rect()
-        self.rect.center = (500,160)
+        self.rect.center = (500+spawnoffset,-100)
         self.radius = 25
-        self.fire_CD = 30
+        self.fire_CD = 10
         self.non_shoot_frame_count = 0
 
+        self.move_cooldown = 60
         self.angle = 270
         self.speed = 3
 
@@ -110,18 +118,20 @@ class Enemy(Plane):
         currentpositionX = self.rect.center[0]
         currentpositionY = self.rect.center[1]
 
+        if self.move_cooldown<0:
+            targetAngle = math.degrees(math.atan2(-(tagetpositionY - currentpositionY),(tagetpositionX - currentpositionX)))
+            if(targetAngle < 0):
+                targetAngle += 360
 
-        targetAngle = math.degrees(math.atan2(-(tagetpositionY - currentpositionY),(tagetpositionX - currentpositionX)))
-        if(targetAngle < 0):
-            targetAngle += 360
-
-        if((((targetAngle - self.angle) + 180) % 360 - 180) > 0):
-            self.angle += 1
-        if((((targetAngle - self.angle) + 180) % 360 - 180) < 0):
-            self.angle -= 1
-        
-        self.angle %= 360
-
+            if((((targetAngle - self.angle) + 180) % 360 - 180) > 0):
+                self.angle += 0.5
+            if((((targetAngle - self.angle) + 180) % 360 - 180) < 0):
+                self.angle -= 0.5
+            
+            self.angle %= 360
+        else:
+            targetAngle = 270
+            self.move_cooldown -= 1
         #print(f"Difference: X:{currentpositionX - tagetpositionX} Y: {currentpositionY - tagetpositionY} angle:{targetAngle} angle_real: {self.angle}")
 
 
@@ -135,7 +145,7 @@ class Enemy(Plane):
         self.rect.move_ip(dx, -dy)
 
         #print(f"{dx},{dy}")
-        if self.non_shoot_frame_count > self.fire_CD:
+        if self.non_shoot_frame_count > self.fire_CD and abs(targetAngle - self.angle) < 30:
             bullet = EnemyBullet(self,self.angle)
             BULLETS.add(bullet)
             self.non_shoot_frame_count = 0
@@ -159,10 +169,17 @@ class Bullet(pygame.sprite.Sprite):
         self.angle = angle
     
     def update(self):
+<<<<<<< HEAD
+=======
+        if self.rect.x < 0 or self.rect.y < 0 or self.rect.x > WINDOWSIZE_WIDTH or self.rect.y > WINDOWSIZE_LENGTH:
+            self.kill()
+            return
+>>>>>>> aa63514a6c8698d7b03658ce2aa2d5d545f4b863
         self.image = pygame.transform.rotate(BULLET_IMAGE,self.angle-90)
         dx = math.cos(math.radians(self.angle)) * self.speed
         dy = math.sin(math.radians(self.angle)) * self.speed
         self.rect.move_ip(dx, -dy)
+
 
     def draw(self,surface):
         surface.blit(self.image, self.rect)
@@ -192,12 +209,17 @@ class EnemyBullet(Bullet):
 
 
 
+<<<<<<< HEAD
     
 
+=======
+>>>>>>> aa63514a6c8698d7b03658ce2aa2d5d545f4b863
 PLAYER = Player()
 ENEMY = Enemy()
 ENEMIES.add(ENEMY)
 score = 0
+
+
 #Game Loop 
 while True:
     for event in pygame.event.get():
@@ -209,19 +231,28 @@ while True:
     PLAYER.update()
     ENEMIES.update()
 
+    #enemy spawning
+    if len(ENEMIES) < 5:
+        randomoffset = random.randint(-480,480)
+        new_enemy = Enemy(randomoffset)
+        ENEMIES.add(new_enemy)
+
     DISPLAYSURF.fill(LIGHTBLUE)
     PLAYER.draw(DISPLAYSURF)
     ENEMIES.draw(DISPLAYSURF)
     BULLETS.draw(DISPLAYSURF)
-
+    font = pygame.font.Font(None, 36)
+    score_text = font.render(f"HP: {PLAYER.hp}", True, BLACK)
+    DISPLAYSURF.blit(score_text, (10, 10))
     playerHits = pygame.sprite.groupcollide(ENEMIES,BULLETS,False,True,pygame.sprite.collide_circle).items()
     for enemy,bullets in playerHits:
         enemy.hp -= len(bullets) * 20
-    for enemy in ENEMIES:
-        pygame.draw.circle(DISPLAYSURF,RED,enemy.rect.center,enemy.radius,2)
-        imageRect = enemy.image.get_rect()
-        imageRect.center = enemy.rect.center
-        pygame.draw.rect(DISPLAYSURF,GRAY,imageRect,2)
+    
+    enemyHits = pygame.sprite.spritecollide(PLAYER,BULLETS,False,pygame.sprite.collide_circle)
+    enemyHits = [bullet for bullet in enemyHits if isinstance(bullet, EnemyBullet)]
+    PLAYER.hp -= len(enemyHits) 
+    for bullet in enemyHits:
+        bullet.kill()
 
     pygame.display.update()
     FPS.tick(60)
