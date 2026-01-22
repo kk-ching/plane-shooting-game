@@ -6,13 +6,19 @@ from pygame.locals import *
 
 pygame.init()
 
+#config
+WINDOWSIZE_WIDTH = 1000
+WINDOWSIZE_LENGTH = 1000
+
+
+
 BLACK = pygame.Color(0, 0, 0)         # Black
 WHITE = pygame.Color(255, 255, 255)   # White
 GRAY = pygame.Color(128, 128, 128)   # Grey
 RED = pygame.Color(255, 0, 0)       # Red
 LIGHTBLUE = pygame.Color(0, 191, 255)
 
-DISPLAYSURF = pygame.display.set_mode((1000,1000))
+DISPLAYSURF = pygame.display.set_mode((WINDOWSIZE_WIDTH,WINDOWSIZE_LENGTH))
 DISPLAYSURF.fill(LIGHTBLUE)
 
 PLAYER = None
