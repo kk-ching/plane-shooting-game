@@ -94,7 +94,7 @@ class Enemy(Plane):
         super().__init__()
         self.image = ENEMY_IMAGE
         self.rect = self.image.get_rect()
-        self.rect.center = (500+spawnoffset,160)
+        self.rect.center = (500+spawnoffset,-100)
         self.radius = 25
         self.fire_CD = 30
         self.non_shoot_frame_count = 0
@@ -117,18 +117,19 @@ class Enemy(Plane):
         currentpositionX = self.rect.center[0]
         currentpositionY = self.rect.center[1]
 
+        if self.rect.center[1] > 100:
+            targetAngle = math.degrees(math.atan2(-(tagetpositionY - currentpositionY),(tagetpositionX - currentpositionX)))
+            if(targetAngle < 0):
+                targetAngle += 360
 
-        targetAngle = math.degrees(math.atan2(-(tagetpositionY - currentpositionY),(tagetpositionX - currentpositionX)))
-        if(targetAngle < 0):
-            targetAngle += 360
-
-        if((((targetAngle - self.angle) + 180) % 360 - 180) > 0):
-            self.angle += 1
-        if((((targetAngle - self.angle) + 180) % 360 - 180) < 0):
-            self.angle -= 1
-        
-        self.angle %= 360
-
+            if((((targetAngle - self.angle) + 180) % 360 - 180) > 0):
+                self.angle += 1
+            if((((targetAngle - self.angle) + 180) % 360 - 180) < 0):
+                self.angle -= 1
+            
+            self.angle %= 360
+        else:
+            targetAngle = 270
         #print(f"Difference: X:{currentpositionX - tagetpositionX} Y: {currentpositionY - tagetpositionY} angle:{targetAngle} angle_real: {self.angle}")
 
 
@@ -228,7 +229,7 @@ while True:
     playerHits = pygame.sprite.groupcollide(ENEMIES,BULLETS,False,True,pygame.sprite.collide_circle).items()
     for enemy,bullets in playerHits:
         enemy.hp -= len(bullets) * 20
-
+    
     pygame.display.update()
     FPS.tick(60)
 
