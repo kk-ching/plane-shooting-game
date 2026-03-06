@@ -2,6 +2,7 @@ import sys
 import pygame
 import random
 import math
+from enum import Enum
 from pygame.locals import *
 
 class Plane(pygame.sprite.Sprite):
@@ -174,7 +175,32 @@ class EnemyBullet(Bullet):
 
         #print(f"Enenmy bullet spawned at {posistionX},{posistionY} angle: {self.angle} offset: {spawnoffset} plane rect size: {self.shooter.rect.w}, {self.shooter.rect.h}")
 
-class Game:
+class Display():
+    WINDOWSIZE_WIDTH = 1000;
+    WINDOWSIZE_LENGTH = 1000;
+    DISPLAYSURF = pygame.display.set_mode((WINDOWSIZE_WIDTH,WINDOWSIZE_LENGTH))
+    GAMESTATE = None
+
+    @staticmethod
+    def update():
+        Display.GAMESTATE.update()
+        Display.GAMESTATE.draw()
+        Display.GAMESTATE.tick()
+
+    @staticmethod
+    def displayTitleScreen():
+        Display.GAMESTATE = None
+
+    @staticmethod
+    def displayGameScreen():
+        Display.GAMESTATE = Game()
+
+class GameState():
+    pass
+
+
+class Game(GameState):
+    #images
     PLAYER_IMAGE = None
     ENEMY_IMAGE = None
     BULLET_IMAGE = None
@@ -187,17 +213,12 @@ class Game:
     LIGHTBLUE = pygame.Color(0, 191, 255)
 
     def __init__(self):
-        pygame.init()
 
         Game.PLAYER_IMAGE = pygame.image.load("images/f16_50p.png")
         Game.ENEMY_IMAGE = pygame.image.load("images/MIG29_50p.png")
         Game.BULLET_IMAGE = pygame.image.load("images/bullet_i.png")
 
-        #define window size
-        self.WINDOWSIZE_WIDTH = 1000;
-        self.WINDOWSIZE_LENGTH = 1000;
-
-        self.DISPLAYSURF = pygame.display.set_mode((self.WINDOWSIZE_WIDTH,self.WINDOWSIZE_LENGTH))
+        self.DISPLAYSURF = Display.DISPLAYSURF
         self.DISPLAYSURF.fill(self.LIGHTBLUE) 
 
         #define objects
@@ -214,6 +235,8 @@ class Game:
             self.ENEMIES.add(new_enemy)
 
     def update(self):
+        self.spawnEnemies()
+
         self.BULLETS.update()
         self.PLAYER.update()
         self.ENEMIES.update()
@@ -237,16 +260,17 @@ class Game:
         self.FPS.tick(60)
 
 
+
 if __name__ == '__main__':
-    g = Game()
+    pygame.init()
+    gs = GameState()
+    Display.displayGameScreen()
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
-        g.spawnEnemies()
-        g.update()
-        g.draw()
-        g.tick()
+        Display.update()
+        
 
 
