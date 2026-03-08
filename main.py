@@ -11,10 +11,6 @@ class Plane(pygame.sprite.Sprite):
         self.game = game
         self.speed = 5
         self.hp = 100
-            
-    def gotHitBy(self, bullets):
-        for bullet in bullets:
-            self.hp -= bullet.getDamage()
 
 class Player(Plane):
     def __init__(self,game):
@@ -62,6 +58,11 @@ class Player(Plane):
             Display.displayGameOverScreen()
         #position = self.rect.center
         #print(f"Player is at ({position[0],position[1]})) HITBOX:({self.rect.left},{self.rect.right}).")
+
+    def gotHitBy(self,bullets):
+        for bullet in bullets:
+            if isinstance(bullet,EnemyBullet):
+                self.hp -= bullet.damage
 
     def draw(self,surface):
         surface.blit(self.image, self.rect)
@@ -132,7 +133,10 @@ class Enemy(Plane):
         #print(self.hp)
         if self.hp < 0:
             self.kill()
-
+    def gotHitBy(self,bullets):
+        for bullet in bullets:
+            if isinstance(bullet,PlayerBullet):
+                self.hp -= bullet.damage
     def draw(self,surface):
         surface.blit(self.image, self.rect)
 
