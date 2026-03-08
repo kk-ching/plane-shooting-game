@@ -57,6 +57,9 @@ class Player(Plane):
                 self.non_shoot_frame_count = 0
         
         self.non_shoot_frame_count += 1
+
+        if self.hp < 0:
+            Display.displayGameOverScreen()
         #position = self.rect.center
         #print(f"Player is at ({position[0],position[1]})) HITBOX:({self.rect.left},{self.rect.right}).")
 
@@ -196,6 +199,10 @@ class Display():
     def displayGameScreen():
         Display.GAMESTATE = Game()
 
+    @staticmethod
+    def displayGameOverScreen():
+        Display.GAMESTATE = GameOverScreen()
+
 class GameState():
     pass
 
@@ -323,7 +330,43 @@ class TitleScreen(GameState):
     def tick(self):
         self.clock.tick(30)
 
+class GameOverScreen(GameState):
+    def __init__(self):
+        self.gameOverText = 'GAME OVER'
+        self.gameOverTextFont = pygame.font.SysFont('Arial',100)
 
+        self.deathMessage = 'Continue? (Press Esc to return to title, Press ENTER to play again)'
+        self.deathMessageFont = pygame.font.SysFont('Arial',30)
+
+        self.displaysurf = Display.DISPLAYSURF
+        self.displaysurf.fill((0, 191, 255))
+
+        self.clock = pygame.time.Clock()
+
+    def update(self):
+        key_pressed = pygame.key.get_pressed()
+        if key_pressed[K_RETURN]:
+            Display.displayGameScreen()
+        if key_pressed[K_ESCAPE]:
+            Display.displayTitleScreen()
+    def draw(self):
+        gameOverTextSurface = self.gameOverTextFont.render(self.gameOverText,False,(255,0,0))
+
+        gameOverTextSurfaceWidth, gameOverTextSurfaceHeight = gameOverTextSurface.get_size()
+        gameOverTextPositionX = Display.WINDOWSIZE_WIDTH/2 - gameOverTextSurfaceWidth/2
+        gameOverTextPositionY = (Display.WINDOWSIZE_HEIGHT/2 - gameOverTextSurfaceHeight/2)*2/6
+
+        deathMessageSurface = self.deathMessageFont.render(self.deathMessage,False,(255,0,0))
+
+        deathMessageSurfaceWidth, deathMessageSurfaceHeight = deathMessageSurface.get_size()
+        deathMessagePositionX = Display.WINDOWSIZE_WIDTH/2 - deathMessageSurfaceWidth/2
+        deathMessagePositionY = (Display.WINDOWSIZE_HEIGHT/2 - deathMessageSurfaceHeight/2)*3/6
+
+        self.displaysurf.blit(gameOverTextSurface,(gameOverTextPositionX,gameOverTextPositionY))
+        self.displaysurf.blit(deathMessageSurface,(deathMessagePositionX,deathMessagePositionY))
+
+    def tick(self):
+        self.clock.tick(30)
 
 if __name__ == '__main__':
     pygame.init()
