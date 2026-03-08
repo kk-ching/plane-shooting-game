@@ -280,6 +280,7 @@ class TitleScreen(GameState):
         self.optionFont = pygame.font.SysFont('Arial',30)
         self.titleFont = pygame.font.SysFont('Arial',100)
         self.displaysurf = Display.DISPLAYSURF
+        self.displaysurf.fill((0, 191, 255))
         
         self.previousKeyPressed = pygame.key.get_pressed()
         self.titleSurface = self.titleFont.render(titleText,False,titleColour)
@@ -319,16 +320,16 @@ class TitleScreen(GameState):
             for value,optionSurface in enumerate(self.optionSurfaces):
                 optionSurfaceWidth,optionSurfaceHeight = optionSurface.get_size()
 
-                boxSurface = pygame.Surface((optionSurfaceWidth,optionSurfaceHeight))
+                boxSurface = pygame.Surface((optionSurfaceWidth,optionSurfaceHeight), pygame.SRCALPHA)
                 if value == self.selectedOptionIndex:
-                    pygame.draw.rect(boxSurface,(255,0,0),optionSurface.get_rect(),1)
+                    pygame.draw.rect(boxSurface,(255,0,0),optionSurface.get_rect(), 1)
                 else:
                     pygame.draw.rect(boxSurface,(0,0,0),optionSurface.get_rect(),1)
 
                 optionPositionX = Display.WINDOWSIZE_WIDTH/2 - optionSurfaceWidth/2
                 optionPositionY = optionVerticalPosition
-                self.displaysurf.blit(boxSurface,(optionPositionX,optionPositionY))
                 self.displaysurf.blit(optionSurface,(optionPositionX,optionPositionY))
+                self.displaysurf.blit(boxSurface,(optionPositionX,optionPositionY))
                 optionVerticalPosition += optionSurfaceHeight 
             
     def tick(self):
