@@ -177,8 +177,8 @@ class EnemyBullet(Bullet):
 
 class Display():
     WINDOWSIZE_WIDTH = 1000;
-    WINDOWSIZE_LENGTH = 1000;
-    DISPLAYSURF = pygame.display.set_mode((WINDOWSIZE_WIDTH,WINDOWSIZE_LENGTH))
+    WINDOWSIZE_HEIGHT = 1000;
+    DISPLAYSURF = pygame.display.set_mode((WINDOWSIZE_WIDTH,WINDOWSIZE_HEIGHT))
     GAMESTATE = None
 
     @staticmethod
@@ -186,10 +186,11 @@ class Display():
         Display.GAMESTATE.update()
         Display.GAMESTATE.draw()
         Display.GAMESTATE.tick()
+        pygame.display.update()  
 
     @staticmethod
     def displayTitleScreen():
-        Display.GAMESTATE = None
+        Display.GAMESTATE = TitleScreen()
 
     @staticmethod
     def displayGameScreen():
@@ -254,17 +255,81 @@ class Game(GameState):
         self.ENEMIES.draw(self.DISPLAYSURF)
         self.BULLETS.draw(self.DISPLAYSURF)
 
-        pygame.display.update()
-
     def tick(self):
         self.FPS.tick(60)
+
+
+class TitleScreen(GameState):
+    def __init__(self):
+        titleText = '1999'
+        titleColour = (255,255,255)
+        options = ['START']
+        optionColour = (255,255,255)
+
+        self.optionFont = pygame.font.SysFont('Arial',30)
+        self.titleFont = pygame.font.SysFont('Arial',100)
+        self.displaysurf = Display.DISPLAYSURF
+        
+        self.previousKeyPressed = pygame.key.get_pressed()
+        self.titleSurface = self.titleFont.render(titleText,False,titleColour)
+
+        self.selectedOptionIndex = 0
+        self.optionSurfaces = []
+        for option in options:
+            self.optionSurfaces.append(self.optionFont.render(option,False,optionColour))
+
+        self.clock = pygame.time.Clock()
+
+
+    def update(self):
+        pressed_keys = pygame.key.get_pressed()
+
+        if pressed_keys[K_UP] and not self.previousKeyPressed[K_UP]:
+            if self.selectedOptionIndex > 0:
+                self.selectedOptionIndex -= 1
+        if pressed_keys[K_DOWN] and not self.previousKeyPressed[K_DOWN]:
+            if self.selectedOptionIndex < len(self.optionSurfaces) - 1:
+                self.selectedOptionIndex += 1  
+
+        if pressed_keys[K_RETURN]:
+            if self.selectedOptionIndex == 0:
+                Display.displayGameScreen()
+
+        self.previousKeyPressed = pressed_keys
+
+    def draw(self):
+            titleSurfaceWidth,titleSurfaceHeight = self.titleSurface.get_size()
+            titlePositionX = Display.WINDOWSIZE_WIDTH/2 - titleSurfaceWidth/2
+            titlePositionY = (Display.WINDOWSIZE_HEIGHT/2)*2/3 - titleSurfaceHeight/2
+            self.displaysurf.blit(self.titleSurface,(titlePositionX,titlePositionY))
+
+            optionVerticalPosition = Display.WINDOWSIZE_HEIGHT * 2/3
+
+            for value,optionSurface in enumerate(self.optionSurfaces):
+                optionSurfaceWidth,optionSurfaceHeight = optionSurface.get_size()
+
+                boxSurface = pygame.Surface((optionSurfaceWidth,optionSurfaceHeight))
+                if value == self.selectedOptionIndex:
+                    pygame.draw.rect(boxSurface,(255,0,0),optionSurface.get_rect(),1)
+                else:
+                    pygame.draw.rect(boxSurface,(0,0,0),optionSurface.get_rect(),1)
+
+                optionPositionX = Display.WINDOWSIZE_WIDTH/2 - optionSurfaceWidth/2
+                optionPositionY = optionVerticalPosition
+                self.displaysurf.blit(boxSurface,(optionPositionX,optionPositionY))
+                self.displaysurf.blit(optionSurface,(optionPositionX,optionPositionY))
+                optionVerticalPosition += optionSurfaceHeight 
+            
+    def tick(self):
+        self.clock.tick(30)
 
 
 
 if __name__ == '__main__':
     pygame.init()
+    pygame.font.init()
     gs = GameState()
-    Display.displayGameScreen()
+    Display.displayTitleScreen()
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
