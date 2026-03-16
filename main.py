@@ -2,7 +2,6 @@ import sys
 import pygame
 import random
 import math
-from enum import Enum
 from pygame.locals import *
 
 class Plane(pygame.sprite.Sprite):
@@ -186,7 +185,15 @@ class Display():
     WINDOWSIZE_WIDTH = 1000;
     WINDOWSIZE_HEIGHT = 1000;
     DISPLAYSURF = pygame.display.set_mode((WINDOWSIZE_WIDTH,WINDOWSIZE_HEIGHT))
+
     GAMESTATE = None
+
+    #define colour
+    BLACK = pygame.Color(0, 0, 0)         # Black
+    WHITE = pygame.Color(255, 255, 255)   # White
+    GRAY = pygame.Color(128, 128, 128)   # Grey
+    RED = pygame.Color(255, 0, 0)       # Red
+    LIGHTBLUE = pygame.Color(0, 191, 255)
 
     @staticmethod
     def update():
@@ -217,21 +224,15 @@ class Game(GameState):
     ENEMY_IMAGE = None
     BULLET_IMAGE = None
 
-    #define colour
-    BLACK = pygame.Color(0, 0, 0)         # Black
-    WHITE = pygame.Color(255, 255, 255)   # White
-    GRAY = pygame.Color(128, 128, 128)   # Grey
-    RED = pygame.Color(255, 0, 0)       # Red
-    LIGHTBLUE = pygame.Color(0, 191, 255)
-
     def __init__(self):
 
         Game.PLAYER_IMAGE = pygame.image.load("images/f16_50p.png")
         Game.ENEMY_IMAGE = pygame.image.load("images/MIG29_50p.png")
         Game.BULLET_IMAGE = pygame.image.load("images/bullet_i.png")
 
+        self.backGroundColour = Display.LIGHTBLUE
         self.DISPLAYSURF = Display.DISPLAYSURF
-        self.DISPLAYSURF.fill(self.LIGHTBLUE) 
+        self.DISPLAYSURF.fill(self.backGroundColour) 
 
         #define objects
         self.PLAYER = Player(self)
@@ -261,7 +262,7 @@ class Game(GameState):
         self.PLAYER.gotHitBy(enemyHits)
 
     def draw(self):        
-        self.DISPLAYSURF.fill(self.LIGHTBLUE)
+        self.DISPLAYSURF.fill(self.backGroundColour)
         self.PLAYER.draw(self.DISPLAYSURF)
         self.ENEMIES.draw(self.DISPLAYSURF)
         self.BULLETS.draw(self.DISPLAYSURF)
@@ -272,13 +273,17 @@ class Game(GameState):
 
 class TitleScreen(GameState):
     def __init__(self):
-        titleText = '1999'
-        titleColour = (255,255,255)
-        options = ['START']
-        optionColour = (255,255,255)
+        titleText = 'HELLFLYERS'
+        titleColour = (120, 122, 121)
 
-        self.optionFont = pygame.font.SysFont('Arial',30)
-        self.titleFont = pygame.font.SysFont('Arial',100)
+        options = ['START','OPTION','CREDIT']
+        optionColour = (255,255,255)
+        self.optionTextMargin = 10
+        self.optionTextPadding = 20
+        self.optionTextBorder = 5
+
+        self.optionFont = pygame.font.SysFont('ShowcardGothic',40)
+        self.titleFont = pygame.font.SysFont('SegoeUIBlack',140)
         self.displaysurf = Display.DISPLAYSURF
         self.displaysurf.fill((0, 191, 255))
         
@@ -288,7 +293,13 @@ class TitleScreen(GameState):
         self.selectedOptionIndex = 0
         self.optionSurfaces = []
         for option in options:
-            self.optionSurfaces.append(self.optionFont.render(option,False,optionColour))
+            font = self.optionFont.render(option,False,optionColour)
+            fontX,fontY = font.get_size()
+            newSurf = pygame.Surface((fontX + self.optionTextPadding, fontY + self.optionTextPadding))
+            newSurf.fill((0, 191, 255))
+            newSurf.blit(font,(self.optionTextPadding//2,self.optionTextPadding//2))
+            
+            self.optionSurfaces.append(newSurf)
 
         self.clock = pygame.time.Clock()
 
@@ -322,15 +333,15 @@ class TitleScreen(GameState):
 
                 boxSurface = pygame.Surface((optionSurfaceWidth,optionSurfaceHeight), pygame.SRCALPHA)
                 if value == self.selectedOptionIndex:
-                    pygame.draw.rect(boxSurface,(255,0,0),optionSurface.get_rect(), 1)
+                    pygame.draw.rect(boxSurface,(255,0,0),optionSurface.get_rect(), 4)
                 else:
-                    pygame.draw.rect(boxSurface,(0,0,0),optionSurface.get_rect(),1)
+                    pygame.draw.rect(boxSurface,(0, 191, 255),optionSurface.get_rect(),4)
 
                 optionPositionX = Display.WINDOWSIZE_WIDTH/2 - optionSurfaceWidth/2
                 optionPositionY = optionVerticalPosition
                 self.displaysurf.blit(optionSurface,(optionPositionX,optionPositionY))
                 self.displaysurf.blit(boxSurface,(optionPositionX,optionPositionY))
-                optionVerticalPosition += optionSurfaceHeight 
+                optionVerticalPosition += optionSurfaceHeight + self.optionTextMargin
             
     def tick(self):
         self.clock.tick(30)
@@ -343,8 +354,10 @@ class GameOverScreen(GameState):
         self.deathMessage = 'Continue? (Press Esc to return to title, Press ENTER to play again)'
         self.deathMessageFont = pygame.font.SysFont('Arial',30)
 
+        self.backGroundColour = Display.LIGHTBLUE
+
         self.displaysurf = Display.DISPLAYSURF
-        self.displaysurf.fill((0, 191, 255))
+        self.displaysurf.fill(self.backGroundColour)
 
         self.clock = pygame.time.Clock()
 
